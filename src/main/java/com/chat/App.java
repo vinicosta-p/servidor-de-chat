@@ -1,13 +1,17 @@
 package com.chat;
 
+import java.io.IOException;
+
+import com.chat.model.Servidor;
 /**
  * Hello world!
  *
  */
 public class App 
 {
-    public static void main( String[] args )
+    public static void main( String[] args ) throws IOException
     {
-        System.out.println( "Hello World!" );
+        Servidor servidor = new Servidor(12345);
+        servidor.initServer();
     }
 }

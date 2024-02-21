@@ -6,13 +6,13 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class GerirClientes implements Runnable {
+public class NovoUsuario implements Runnable {
         private Socket cliente;
         private Scanner entrada;
         private String nickName = "";
         private PrintStream saidaServidor;
         
-        GerirClientes(Socket cliente) throws FileNotFoundException, IOException{
+        NovoUsuario(Socket cliente) throws FileNotFoundException, IOException{
             this.cliente = cliente;
             this.entrada = new Scanner(this.cliente.getInputStream());
             this.saidaServidor = new PrintStream(this.cliente.getOutputStream());
@@ -25,12 +25,12 @@ public class GerirClientes implements Runnable {
 
                 nomeDoCliente();
                 
-                Server.messageToAll(nickName + " entrou no chat", this);
+                Servidor.notificarTodos(nickName + " entrou no chat", this);
                 System.out.println(nickName + " entrou no chat");
 
                 while (entrada.hasNextLine()) {
                     String message = entrada.nextLine() + " - " + nickName;
-                    Server.messageToAll(message, this);
+                    Servidor.notificarTodos(message, this);
                     System.out.println(message);
                 }
 
