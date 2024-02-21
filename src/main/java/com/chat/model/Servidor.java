@@ -2,6 +2,7 @@ package com.chat.model;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -10,9 +11,10 @@ import java.util.List;
 
 
 public class Servidor {
-    private static List<NovoUsuario> listaDGerirClientes = new ArrayList<NovoUsuario>();
+    private List<NovoUsuario> listaDGerirClientes = new ArrayList<NovoUsuario>();
     private ServerSocket servidor;
     private int porta;
+    private PrintStream saidaServidor;
 
     public Servidor(int porta){
         this.porta = porta;
@@ -35,23 +37,29 @@ public class Servidor {
     }
 
     private void novaConexao(Socket socketCliente) throws FileNotFoundException, IOException{
-            NovoUsuario novoCliente = new NovoUsuario(socketCliente);
+            NovoUsuario novoCliente = new NovoUsuario(socketCliente, this);
 
             listaDGerirClientes.add(novoCliente);
-
+            
             Thread novaThread = new Thread(novoCliente);
             novaThread.start();
+            saidaServidor = new PrintStream(socketCliente.getOutputStream());
+            saidaServidor.println("Escreva seu nome: ");
     }
 
 
-    public static void notificarTodos(String message, NovoUsuario mensageiro){
+    public void notificarTodos(String message, NovoUsuario mensageiro) throws IOException{
         for(NovoUsuario cls : listaDGerirClientes){
             if(cls != mensageiro){
-                cls.sendMessage(message);
+                saidaServidor = new PrintStream(cls.getCliente().getOutputStream());
+                saidaServidor.println(message);
             }
         }
     }
 
+    /**
+     * 
+     */
     public int getPorta() {
         return porta;
     }

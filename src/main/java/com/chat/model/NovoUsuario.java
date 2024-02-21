@@ -1,38 +1,31 @@
 package com.chat.model;
 
+import com.chat.model.Servidor;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class NovoUsuario implements Runnable {
+
+public class NovoUsuario extends Thread {
         private Socket cliente;
         private Scanner entrada;
         private String nickName = "";
-        private PrintStream saidaServidor;
+        private Servidor servidor;
         
-        NovoUsuario(Socket cliente) throws FileNotFoundException, IOException{
+        NovoUsuario(Socket cliente, Servidor servidor) throws FileNotFoundException, IOException{
             this.cliente = cliente;
             this.entrada = new Scanner(this.cliente.getInputStream());
-            this.saidaServidor = new PrintStream(this.cliente.getOutputStream());
+            this.servidor = servidor;
         }
 
         public void run(){
             try{
-                System.out.println("Nova conexão com o cliente " +  
-                this.cliente.getInetAddress().getHostAddress());
-
+                //evento
                 nomeDoCliente();
-                
-                Servidor.notificarTodos(nickName + " entrou no chat", this);
-                System.out.println(nickName + " entrou no chat");
-
-                while (entrada.hasNextLine()) {
-                    String message = entrada.nextLine() + " - " + nickName;
-                    Servidor.notificarTodos(message, this);
-                    System.out.println(message);
-                }
+                //evento
+                listenerUsuario();
 
                 entrada.close();
                 this.cliente.close();
@@ -40,10 +33,19 @@ public class NovoUsuario implements Runnable {
                 e.printStackTrace();
             }
         }
+       
+        private void listenerUsuario() throws IOException{
+            while (entrada.hasNextLine()) {
+                String message = entrada.nextLine() + " - " + nickName;
+                servidor.notificarTodos(message, this);
+                System.out.println(message);
+            }
+        }
+
 
         public void nomeDoCliente() throws IOException{
                         
-            saidaServidor.println("Escreva seu nome: ");
+            //saidaServidor.println("Escreva seu nome: ");
 
             while (true) {
                 if(entrada.hasNextLine()){
@@ -52,10 +54,11 @@ public class NovoUsuario implements Runnable {
                 }   
             }
             
-        }
-
-        public void sendMessage(String message){
-            this.saidaServidor.println(message);
+            servidor.notificarTodos(nickName + " entrou no chat", this);
+            System.out.println(nickName + " entrou no chat");
         }
         
+        public Socket getCliente() {
+            return cliente;
+        }
 }
