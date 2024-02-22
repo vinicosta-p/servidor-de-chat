@@ -1,7 +1,5 @@
 package com.chat.model;
 
-import com.chat.model.Servidor;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
@@ -26,26 +24,38 @@ public class NovoUsuario extends Thread {
                 nomeDoCliente();
                 //evento
                 listenerUsuario();
-
-                entrada.close();
-                this.cliente.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        private void exitChat() throws IOException{
+            servidor.desconectar(this);
+            nickName = null;
+            entrada.close();
+            this.cliente.close();
+        }
        
-        private void listenerUsuario() throws IOException{
+        private void listenerUsuario() throws IOException {
             while (entrada.hasNextLine()) {
-                String message = entrada.nextLine() + " - " + nickName;
-                servidor.notificarTodos(message, this);
-                System.out.println(message);
+                String inputUser = entrada.nextLine();
+                
+                if(inputUser.compareTo("sdc -exit") == 0){
+                    exitChat();
+                    break;
+                }
+                
+                sendMessage(inputUser);
             }
+        }
+
+        private void sendMessage(String inputUser) throws IOException{
+            String message =  inputUser + " - " + nickName;
+            servidor.notificarTodos(message, this);
+            System.out.println(message);
         }
 
 
         public void nomeDoCliente() throws IOException{
-                        
-            //saidaServidor.println("Escreva seu nome: ");
 
             while (true) {
                 if(entrada.hasNextLine()){
@@ -60,5 +70,9 @@ public class NovoUsuario extends Thread {
         
         public Socket getCliente() {
             return cliente;
+        }
+
+        public String getNickName() {
+            return nickName;
         }
 }

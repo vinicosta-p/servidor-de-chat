@@ -25,6 +25,7 @@ public class Servidor {
         servidor = new ServerSocket(porta);
         System.out.println("Porta " + porta + " aberta!");
         
+        //Migrar para uma thread
         while(true){
             Socket cliente = servidor.accept();  
             novaConexao(cliente);
@@ -33,6 +34,9 @@ public class Servidor {
     }
 
     public void finalizarServidor() throws IOException{
+        for(NovoUsuario cls : listaDGerirClientes){
+            cls.getCliente().close();
+        }
         servidor.close();
     }
 
@@ -47,6 +51,13 @@ public class Servidor {
             saidaServidor.println("Escreva seu nome: ");
     }
 
+    public void desconectar(NovoUsuario usuarioDesconectado) throws IOException{
+        String mensagemDeSaida = usuarioDesconectado.getNickName() + " saiu do grupo de chat ";
+        System.out.println(mensagemDeSaida);
+        notificarTodos(mensagemDeSaida, usuarioDesconectado);
+        listaDGerirClientes.remove(usuarioDesconectado);
+    }
+
 
     public void notificarTodos(String message, NovoUsuario mensageiro) throws IOException{
         for(NovoUsuario cls : listaDGerirClientes){
@@ -56,7 +67,6 @@ public class Servidor {
             }
         }
     }
-
     /**
      * 
      */

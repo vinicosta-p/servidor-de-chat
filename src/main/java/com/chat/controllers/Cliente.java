@@ -19,7 +19,13 @@ public class Cliente {
         new ServerListener(cliente).start();
         
         while (teclado.hasNextLine()) {
-            saida.println(teclado.nextLine());
+            String inputUser = teclado.nextLine();
+            saida.println(inputUser);
+            //tratar no serverlistener
+            if(inputUser.compareTo("sdc -exit") == 0){
+                break;
+            }
+            
         }
 
         saida.close();
